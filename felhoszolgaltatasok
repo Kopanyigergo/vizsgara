@@ -1,0 +1,85 @@
+A VPC konzolon, Your VPCs, Create VPC 
+Név: elsoVPC 
+CIDR: 172.16.0.0/16 
+
+A VPC konzolon, Subnets, Create subnet 
+Név: pubSubnet 
+CIDR: 172.16.1.0/24 
+Név: privSubnet 
+CIDR: 172.16.2.0/24 
+
+A VPC konzolon, pubSubnet, Actions, Edit 
+Enable auto-assign public IPv4 address 
+
+A VPC konzolon, Internet Gateways, Create Internet Gateways 
+Név: elsoIGW 
+
+A VPC konzolon, elsoIGW, Actions, Attach to VPC 
+ElsoVPC-t kell választani 
+
+A VPC konzolon, Route tables, elsoVPC-hez tartozó Route table, Routes, Edit routes, Add routes 
+Destination: 0.0.0.0/0 
+Target: Internet Gateway, elsoIGW 
+
+A VPC konzolon, Security Groups, Create security group 
+Név: elsoSG 
+VPC: elsoVPC (default VPC-t ne használjuk) 
+Inbound rules, Add rules 
+Type: RDP 
+Source: 0.0.0.0/0 
+
+Az EC2 konzolon, Launch instance 
+Windows Server 1 
+Network: elsoVPC 
+Subnet: pubSubnet 
+Firewall: elsoSG 
+Windows Server 2 
+Network: elsoVPC 
+Subnet: privSubnet 
+Firewall: elsoSG 
+
+A VPC konzolon, NAT Gateways, Create NAT Gateways 
+Név: elsoNATGW 
+Subnet: pubSubnet 
+Allocate Elastic IP 
+
+A VPC konzolon, Route tables, Create route table 
+Név: privSubnetTabla 
+VPC: elsoVPC 
+
+A VPC konzolon, Route tables, privSubnetTabla, Subnet associations, Edit subnet associations 
+Available subnets: privSubnet 
+
+A VPC konzolon, Route tables, privSubnetTabla, Routes, Edit routes, Add routes 
+Destination: 0.0.0.0/0 
+Target: NAT Gateway, elsoNATGW 
+
+Törlés 
+Az EC2 konzolon töröljük a két virtuális gépet 
+A VPC konzolon, NAT Gateways, Actions 
+Delete NAT gateway 
+Megvárni, amíg a State: deleted 
+A VPC konzolon, Your VPCs, elsoVPC, Actions 
+Delete VPC 
+A VPC konzolon, Elastic IPs, Foglalt IP, Actions 
+ Release Elastic IP addresses 
+
+ 
+
+ 
+
+ Terheléselosztó kialakítása 
+
+Az EC2 konzolon, Target Groups, Create target group 
+Choose a target type: Instances 
+Target group name: elsoTG 
+Next 
+Available instances: Válasszunk 
+Include as pendink below 
+
+Az EC2 konzolon, Load Balancers, Create load balancer 
+Load balancer types: Application Load Balancer 
+Név: elsoLB 
+Availability Zones and subnets: mindegyiket kiválasztjuk 
+Security groups: Sajátot válasszunk, a default-ot kapcsoljuk ki 
+ Listeners and routing: Default action: elsoTG 
