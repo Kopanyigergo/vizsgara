@@ -1,0 +1,178 @@
+------------------------------------------------------------windows:
+Jelszócsere: net user username újjelszó 
+IP cím eldobás: ipconfig /release 
+IP cím újrakérés: ipconfig /renew 
+Vezérlőpult-Programok és szolgáltatások: appwiz.cpl 
+Vezérlőpult-Eszközök és nyomtatók: control printers 
+IIS telepítése:https://www.youtube.com/watch?v=oQkjtTEa6M4
+FTP szerver - https://www.youtube.com/watch?v=QsGPqkobCs8
+
+Telepítés, Windows Server bootstrap script: 
+
+<powershell> 
+Install-WindowsFeature -name Web-Server -IncludeManagementTools 
+Set-Location C:\inetpub\wwwroot 
+Add-Content iisstart.htm "<h1>Szia!</h1><p>Ez a $env:COMPUTERNAME.</p>" 
+</powershell> 
+
+ 
+------------------------------------------------------------------------------------Ubuntu Linux :
+!Segédletek: http://szit.hu/doku.php?id=oktatas:linux --> Szerver szekció 
+
+!standard telepítés 
+
+------------------------------------------------------------------------------------------- 
+
+sudo nano /etc/netplan/50-installer-config.yaml 
+    network: 
+        ethernets: 
+        enp0s3: 
+            dhcp4: true 
+        enp0s8: 
+            addresses: [192.168.1.2/24] 
+        version: 2 
+sudo netplan apply 
+hostname -I //IP cím ellenőrzés 
+ip a 
+
+------------------------------------------------------------------------------------------- 
+
+sudo apt update 
+sudo apt upgrade 
+sudo reboot     
+sudo apt install mc 
+sudo do-release-upgrade 
+
+------------------------------------------------------------------------------------------- 
+
+sudo apt install lamp-server^ phpmyadmin 
+sudo apt install w3m // kliens ha még nincs telepítve -- böngésző program--- 
+
+------------------------------------------------------------------------------------------- 
+
+sudo apt install vsftpd 
+sudo mcedit /etc/vsftpd.conf  
+    local_enable=YES 
+    write_enable=YES 
+sudo service vsftpd restart 
+
+------------------------------------------------------------------------------------------- 
+
+sudo apt install openssh-server 
+
+------------------------------------------------------------------------------------------- 
+
+sudo apt install isc-dhcp-server 
+sudo mcedit /etc/dhcp/dhcpd.conf 
+
+ 
+
+default-lease-time 600; 
+max-lease-time 7200; 
+ddns-update-style none; 
+authoritative; 
+subnet 192.168.1.0 netmask 255.255.255.0 { 
+  range 192.168.1.50 192.168.1.254; 
+  option domain-name-servers 192.168.1.2; 
+}  
+
+ 
+
+sudo service isc-dhcp-server restart 
+
+
+sudo mcedit /etc/default/isc-dhcp-server 
+    INTERFACESv4="enp0s8" 
+
+ 
+
+DNS szerver ellenőrzés: 
+systemd-resolve --status 
+
+------------------------------------------------------------------------------------------- 
+
+sudo apt install postfix 
+sudo apt install alpine {levelező kliens} 
+sudo apt install popa3d --postfixbe érkező levelek, lehetőség POP protokollal is olvashassuk- 
+
+------------------------------------------------------------------------------------------- 
+
+sudo apt install samba 
+sudo adduser peti //linux user 
+sudo smbpasswd -a peti //samba felhasználóvá tesszük 
+sudo mkdir /install 
+sudo nano /etc/samba/smb.conf 
+[install] 
+       path = /install 
+       writeable = yes 
+       comment = Itt vannak a telepitokeszletek 
+[homes] 
+       writeable = yes 
+sudo service smbd status 
+sudo service nmbd status 
+sudo pdbedit -L  //samba felhasználók listázása 
+
+------------------------------------------------------------------------------------------- 
+
+sudo apt install bind9 
+mkdir /var/cache/bind/master 
+mkdir /var/cache/bind/slave 
+touch /var/cache/bind/managed-keys.bind 
+chown bind:bind /var/cache/bind/managed-keys.bind 
+mcedit /etc/bind/named.conf.local 
+   zone "cegnev.local" in { 
+         type master; 
+         notify yes; 
+   file "master/cegnev.local.zone"; 
+   }; 
+touch /var/cache/bind/master/cegnev.local.zone 
+   $TTL 3D 
+   cegnev.local. SOA ns.cegnev.local. hostmaster.cegnev.local. ( 
+                2012012401 
+                8H 
+                2H 
+                4W 
+                1D) 
+           NS    ns.cegnev.local. 
+           A    192.168.1.2 
+       ns       A       192.168.1.2 
+
+
+nslookup petrik.hu 8.8.8.8 
+nslookup -> set type=mx -> petrik.hu 
+
+------------------------------------------------------------------------------------------- 
+
+sudo mcedit /etc/apt/sources.list.d/webmin.list 
+    # Repository for Webmin 
+    deb http://download.webmin.com/download/repository sarge contrib 
+wget http://www.webmin.com/jcameron-key.asc 
+sudo apt-key add jcameron-key.asc 
+sudo apt update 
+sudo apt install webmin 
+
+------------------------------------------------------------------------------------------- 
+
+sudo apt install cifs-utils 
+sudo mount -t cifs -o username=peti,password=abc123ABC //172.31.33.68/public /media/windowsshare/ 
+
+------------------------------------------------------------------------------------------- 
+
+sudo update-alternatives --config editor    {Alapértelmezett editor átállítása} 
+sudo loadkeys hu [Magyar billentyűzetkiosztásra váltás] 
+
+------------------------------------------------------------------------------------------- 
+
+Kliens felbontás állítása: 
+
+
+sudo nano /etc/default/grub 
+GRUB_CMDLINE_LINUX_DEFAULT="quiet splash video=hyperv_fb:1920x1080" 
+sudo update-grub 
+sudo reboot 
+
+------------------------------------------------------------------------------------------
+
+ 
+
+ 
