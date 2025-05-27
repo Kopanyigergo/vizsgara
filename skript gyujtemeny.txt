@@ -1,0 +1,77 @@
+#eszköznév:
+hostname nev
+
+#privilegizált jelszó:
+enable secret cisco
+
+#console jelszó:
+line con 0
+password cisco
+login
+exit
+
+#jelszó titkosítás:
+service password-encryption
+
+#banner üzenet:
+banner motd 0
+uzenet0
+
+#SSH:
+ip domain-name teszt.hu
+crypto key generate rsa general-keys modulus 1024
+ip ssh version 2
+username admin privilege 15 password cisco
+line vty 0 15
+login local
+transport input ssh
+exit
+
+#RIP protokoll:
+router rip
+no auto-summary
+network 10.0.0.0
+network 10.1.1.0
+exit
+
+#OSPF:
+router ospf 115
+log-adjacency-changes
+network 192.168.1.0 0.0.0.255 area 0
+network 10.0.0.0 0.0.0.3 area 0
+exit
+
+#OSPF MD5 titkosítás:
+int s0/0/0
+ip ospf message-digest-key 1 md5 cisco
+ip ospf authentication message-digest
+exit
+
+#HSRP:
+interface g0/1
+standby 1 ip 192.168.0.254
+standby 1 priority 150
+standby 1 preempt
+exit
+
+#GLBP:
+interface g0/1
+glbp 1 ip 192.168.0.254
+glbp 1 preempt
+glbp 1 priority 150
+glbp 1 load-balancing round-robin
+
+#Etherchannel (LACP):
+interface range f0/1-2
+channel-group 1 mode active
+interface port-channel 1
+switchport mode trunk
+exit
+
+#BGP:
+router bgp 1
+neighbor 10.0.0.2 remote-as 2
+network 192.168.0.1 mask 255.255.255.0
+router bgp saját hálózatnak szám
+neighbor következő ugrás remote-as másik hálózat száma
+network belső hálózat mask mask
